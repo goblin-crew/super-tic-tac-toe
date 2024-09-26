@@ -1,0 +1,6 @@
+
+Super Tic Tac Toe begins with the usual 3 by 3 grid, but in each of its squares another tic tac toe game is placed. The first player can play in any of these 81 spaces. Let's say they choose to play in the middle game in the upper right. Right. The next player must play in the game whose location corresponds to the square chosen in the previous move.
+
+So because x chose the upper right square, o must play in the upper right game. Let's say o goes in the middle, this means that x must play the game in the middle. Oh, because x played the middle square, o is now forced to play in this very same game and can block x. Play continues like this until someone gets 3 in a row in one of the games. When they do that entire square is marked for them.
+
+If a player is ever forced to play in a game that has already been won, well, they can't and instead they get to choose to play anywhere. Play continues until someone wins 3 games that are in a row.
