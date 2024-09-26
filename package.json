@@ -2,7 +2,7 @@
   "name": "super-tic-tac-toe",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://goblincrew.github.io/super-tic-tac-toe",
+  "homepage": "https://goblin-crew.github.io/super-tic-tac-toe/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
