@@ -1,24 +1,35 @@
 import React from 'react';
 import SubBoard from './SubBoard';
 
-interface BoardProps {
+interface GameState {
     currentPlayer: 'X' | 'O';
     nextSubBoard: number | null;
-    onMove: (subBoardIndex: number, cellIndex: number, subBoardWinner: 'X' | 'O' | 'Draw' | null) => void;
     subBoardWinners: Array<'X' | 'O' | 'Draw' | null>;
+    subBoards: Array<Array<'X' | 'O' | null>>;
+    winner: 'X' | 'O' | 'Draw' | null;
 }
 
-const Board: React.FC<BoardProps> = ({ currentPlayer, nextSubBoard, onMove, subBoardWinners }) => {
+interface BoardProps {
+    gameState: GameState;
+    onMove: (subBoardIndex: number, cellIndex: number) => void;
+    gameMode: 'local' | 'online';
+    playerRole: 'X' | 'O' | null;
+}
+
+const Board: React.FC<BoardProps> = ({ gameState, onMove, gameMode, playerRole }) => {
     const renderSubBoard = (index: number) => {
-        const isActive = nextSubBoard === null || nextSubBoard === index;
+        const isActive = gameState.nextSubBoard === null || gameState.nextSubBoard === index;
         return (
             <SubBoard
                 key={index}
                 index={index}
-                currentPlayer={currentPlayer}
+                currentPlayer={gameState.currentPlayer}
                 isActive={isActive}
                 onMove={onMove}
-                winner={subBoardWinners[index]}
+                winner={gameState.subBoardWinners[index]}
+                cells={gameState.subBoards[index]}
+                gameMode={gameMode}
+                playerRole={playerRole}
             />
         );
     };
