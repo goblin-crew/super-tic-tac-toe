@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Board from './components/Board';
 import PeerConnection from './components/PeerConnection';
 import { DataConnection } from 'peerjs';
+import qs from 'qs';
 
 interface GameState {
   currentPlayer: 'X' | 'O';
@@ -34,6 +35,8 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }, [gameState]);
+
+
 
   const checkWinner = (board: Array<'X' | 'O' | 'Draw' | null>): 'X' | 'O' | 'Draw' | null => {
     const lines = [
@@ -95,7 +98,7 @@ const App: React.FC = () => {
     });
   };
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     const newState: GameState = {
       currentPlayer: 'X',
       nextSubBoard: null,
@@ -107,7 +110,7 @@ const App: React.FC = () => {
     if (gameMode === 'online' && connection) {
       connection.send({ type: 'gameState', state: newState });
     }
-  };
+  }, [connection, gameMode]);
 
   const handleConnectionEstablished = useCallback((conn: DataConnection, initiator: boolean) => {
     setConnection(conn);
@@ -133,10 +136,19 @@ const App: React.FC = () => {
     resetGame();
   };
 
-  const startOnlineGame = () => {
+  const startOnlineGame = useCallback(() => {
     setGameMode('online');
     resetGame();
-  };
+  }, [resetGame]);
+
+  useEffect(() => {
+    if (window.location.search && qs.parse(window.location.search, { ignoreQueryPrefix: true }).remotePeerId) {
+      const queryPereId = qs.parse(window.location.search, { ignoreQueryPrefix: true }).remotePeerId;
+      if (queryPereId && typeof queryPereId === 'string') {
+        startOnlineGame();
+      }
+    }
+  }, [startOnlineGame]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 flex items-center justify-center p-4">

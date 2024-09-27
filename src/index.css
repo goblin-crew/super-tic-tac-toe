@@ -49,3 +49,10 @@ code {
     transform: scale(1);
   }
 }
+
+.svg {
+  max-height: 1.5em;
+  display: inline-block;
+  position: relative;
+  vertical-align: bottom;
+}
