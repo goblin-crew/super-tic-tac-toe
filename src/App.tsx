@@ -114,7 +114,7 @@ const App: React.FC = () => {
     setGameMode('online');
     const role = initiator ? 'X' : 'O';
     setPlayerRole(role);
-    resetGame();
+    // resetGame();
   }, []);
 
   const handleDataReceived = useCallback((data: any) => {
