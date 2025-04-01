@@ -177,12 +177,12 @@ const PeerConnection: React.FC<PeerConnectionProps> = ({
     };
 
     return (
-        <div className="peer-connection mt-4">
+        <div className="peer-connection mt-6 glass-light p-4 rounded-lg">
             <div className="flex justify-center items-center mb-4">
                 <p className="text-center mr-2">Your Peer ID: <span className="font-bold">{peer?.id}</span></p>
                 <button
                     onClick={copyInviteLink}
-                    className={`px-4 py-2 ${linkCopied ? 'bg-blue-500' : 'bg-green-500'} text-white font-semibold rounded-lg hover:bg-opacity-80 transition-colors duration-300`}
+                    className={`px-4 py-2 ${linkCopied ? 'glass-button' : 'glass-button-green'} text-white font-semibold rounded-lg`}
                 >
                     {linkCopied ? 'Copied!' : 'Copy Invite Link'}
                 </button>
@@ -193,7 +193,7 @@ const PeerConnection: React.FC<PeerConnectionProps> = ({
                     <input
                         type="text"
                         placeholder="Enter peer ID to connect"
-                        className="px-4 py-2 border rounded-l-lg"
+                        className="glass-input px-4 py-2 rounded-l-lg"
                         value={remotePeerId}
                         onChange={(e) => setRemotePeerId(e.target.value)}
                         onKeyPress={(e) => {
@@ -204,14 +204,14 @@ const PeerConnection: React.FC<PeerConnectionProps> = ({
                     />
                     <button
                         onClick={() => connectToPeer(remotePeerId)}
-                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                        className="glass-button px-4 py-2 text-white font-semibold rounded-r-lg"
                     >
                         Connect
                     </button>
                 </div>
             )}
             {connection && (
-                <p className="text-center text-green-500 font-semibold">
+                <p className="text-center text-green-400 font-semibold mt-2">
                     Connected to: {getOpponentNickname()}
                 </p>
             )}

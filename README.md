@@ -1,8 +1,30 @@
-# Playing the game
+# Super Tic Tac Toe
+
+A modern implementation of Super Tic Tac Toe with a dark glassmorphism theme.
+
+## Playing the game
 
 The game is deployed here: https://goblin-crew.github.io/super-tic-tac-toe/
 
-# Getting Started with Create React App
+### Game Rules
+
+Super Tic Tac Toe begins with a 3x3 grid, but in each of its squares another tic tac toe game is placed. The first player can play in any of these 81 spaces. The next player must play in the game whose location corresponds to the square chosen in the previous move.
+
+For example, if player X chooses the upper right square in one of the sub-boards, player O must play in the upper right sub-board. Play continues like this until someone gets 3 in a row in one of the sub-boards. When they do, that entire square is marked for them.
+
+If a player is ever forced to play in a sub-board that has already been won, they can choose to play anywhere. Play continues until someone wins 3 sub-boards in a row.
+
+## Features
+
+- Dark glassmorphism UI theme with subtle glow effects
+- Local and online multiplayer modes
+- Peer-to-peer connection for online play
+- Responsive design
+- Symmetrical square game board with consistent spacing
+- Visual player turn indicators with color-coded highlights
+- Animated UI elements for better user experience
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -19,7 +41,6 @@ The page will reload if you make edits.\
 You will also see any lint errors in the console.
 
 ### `npm test`
-
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 

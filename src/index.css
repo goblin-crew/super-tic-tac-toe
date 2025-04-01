@@ -9,6 +9,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #1a1c25 0%, #121420 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
 }
 
 code {
@@ -16,38 +19,180 @@ code {
     monospace;
 }
 
-.sub-board {
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(23, 25, 35, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--tw-shadow-color, rgba(255, 255, 255, 0.1));
+  box-shadow: inset var(--tw-shadow-colored, 0 8px 32px 0 rgba(0, 0, 0, 0.37));
+}
+
+.glass-dark {
+  background: rgba(23, 25, 35, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-input {
+  background: rgba(23, 25, 35, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-button {
+  background: rgba(66, 153, 225, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(66, 153, 225, 0.3);
   transition: all 0.3s ease;
 }
 
+.glass-button:hover {
+  background: rgba(66, 153, 225, 0.3);
+  box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+}
+
+.glass-button-green {
+  background: rgba(72, 187, 120, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(72, 187, 120, 0.3);
+  transition: all 0.3s ease;
+}
+
+.glass-button-green:hover {
+  background: rgba(72, 187, 120, 0.3);
+  box-shadow: 0 0 15px rgba(72, 187, 120, 0.5);
+}
+
+.sub-board {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+}
+
 .sub-board:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .cell {
   transition: all 0.2s ease;
+  border-radius: 0.25rem;
+  user-select: none;
 }
 
 .cell:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .winner-cell {
-  animation: pulse 1s infinite;
+  animation: glow-pulse 1.5s infinite;
 }
 
-@keyframes pulse {
+@keyframes glow-pulse {
   0% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     transform: scale(1);
   }
 
   50% {
-    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    transform: scale(1.05);
   }
 
   100% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     transform: scale(1);
   }
+}
+
+.inset-shadow {
+      box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) inset;
+}
+
+/* .winner-x {
+  animation: glow-pulse-x 1.5s infinite;
+}
+
+@keyframes glow-pulse-x {
+  0% {
+    box-shadow: 0 0 5px rgba(66, 153, 225, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(66, 153, 225, 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(66, 153, 225, 0.5);
+  }
+}
+
+.winner-o {
+  animation: glow-pulse-o 1.5s infinite;
+}
+
+@keyframes glow-pulse-o {
+  0% {
+    box-shadow: 0 0 5px rgba(245, 101, 101, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(245, 101, 101, 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(245, 101, 101, 0.5);
+  }
+} */
+
+/* Subtle pulse animation for active player turn */
+@keyframes pulse-subtle {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+/* Current player indicator styles */
+.current-player-x {
+  border-left: 4px solid #4299e1;
+  box-shadow: -4px 0 8px rgba(66, 153, 225, 0.3);
+}
+
+.current-player-o {
+  border-left: 4px solid #f56565;
+  box-shadow: -4px 0 8px rgba(245, 101, 101, 0.3);
 }
 
 .svg {

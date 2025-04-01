@@ -1,63 +1,134 @@
-import React from 'react';
+import React, { useEffect } from "react";
 
 interface SubBoardProps {
-    index: number;
-    currentPlayer: 'X' | 'O';
-    isActive: boolean;
-    onMove: (subBoardIndex: number, cellIndex: number) => void;
-    winner: 'X' | 'O' | 'Draw' | null;
-    cells: Array<'X' | 'O' | null>;
-    gameMode: 'local' | 'online';
-    playerRole: 'X' | 'O' | null;
+  index: number;
+  currentPlayer: "X" | "O";
+  isActive: boolean;
+  onMove: (subBoardIndex: number, cellIndex: number) => void;
+  winner: "X" | "O" | "Draw" | null;
+  cells: Array<"X" | "O" | null>;
+  gameMode: "local" | "online";
+  playerRole: "X" | "O" | null;
 }
 
 const SubBoard: React.FC<SubBoardProps> = ({
-    index,
-    currentPlayer,
-    isActive,
-    onMove,
-    winner,
-    cells,
-    gameMode,
-    playerRole
+  index,
+  currentPlayer,
+  isActive,
+  onMove,
+  winner,
+  cells,
+  gameMode,
+  playerRole,
 }) => {
-    const handleCellClick = (cellIndex: number) => {
-        if (!isActive || winner || cells[cellIndex]) return;
-        if (gameMode === 'online' && currentPlayer !== playerRole) return;
-        onMove(index, cellIndex);
-    };
+  const [isPlayerTurn, setIsPlayerTurn] = React.useState<boolean>(
+    gameMode === "local" ||
+      (gameMode === "online" && currentPlayer === playerRole)
+  );
+  useEffect(() => {
+    if (gameMode === "online") {
+      setIsPlayerTurn(currentPlayer === playerRole);
+    } else {
+      setIsPlayerTurn(true);
+    }
+  }, [currentPlayer, playerRole, gameMode]);
 
-    const renderCell = (cellIndex: number) => {
-        return (
-            <button
-                key={cellIndex}
-                className={`cell w-10 h-10 flex items-center justify-center text-2xl font-bold 
-          ${isActive && !winner ? 'bg-white hover:bg-gray-100' : 'bg-gray-200'}
-          ${cells[cellIndex] === 'X' ? 'text-blue-500' : cells[cellIndex] === 'O' ? 'text-red-500' : ''}
-          ${winner ? 'winner-cell' : ''}`}
-                onClick={() => handleCellClick(cellIndex)}
-                disabled={!isActive || winner !== null || (gameMode === 'online' && currentPlayer !== playerRole)}
-            >
-                {cells[cellIndex]}
-            </button>
-        );
-    };
+  const handleCellClick = (cellIndex: number) => {
+    if (!isActive || winner || cells[cellIndex]) return;
+    if (gameMode === "online" && currentPlayer !== playerRole) return;
+    onMove(index, cellIndex);
+  };
 
-    const isPlayerTurn = gameMode === 'local' || (gameMode === 'online' && currentPlayer === playerRole);
+  const renderCell = (cellIndex: number) => {
+    const isCurrentPlayerX = currentPlayer === "X";
+    const cellContent = cells[cellIndex];
 
     return (
-        <div className={`sub-board p-2 ${isActive && !winner ? (isPlayerTurn ? 'bg-green-200' : 'bg-red-200') : 'bg-gray-300'}`}>
-            {winner ? (
-                <div className="w-full h-full flex items-center justify-center text-4xl font-bold winner-cell">
-                    {winner === 'Draw' ? 'D' : winner}
-                </div>
-            ) : (
-                <div className="grid grid-cols-3 gap-1">
-                    {[...Array(9)].map((_, cellIndex) => renderCell(cellIndex))}
-                </div>
-            )}
-        </div>
+      <button
+        key={cellIndex}
+        className={`cell aspect-square w-full flex items-center justify-center text-2xl font-bold 
+                ${
+                  isActive && !winner
+                    ? "glass-light hover:bg-glass-200"
+                    : "glass"
+                }
+                ${
+                  cellContent === "X"
+                    ? "text-blue-400"
+                    : cellContent === "O"
+                    ? "text-red-400"
+                    : ""
+                }
+                ${winner ? "winner-cell" : ""}
+                ${
+                  cellContent === "X"
+                    ? isActive
+                      ? "shadow-glow-blue"
+                      : ""
+                    : cellContent === "O"
+                    ? isActive
+                      ? "shadow-glow-red"
+                      : ""
+                    : ""
+                }
+                ${
+                  isActive && !winner && !cellContent
+                    ? isCurrentPlayerX
+                      ? "hover:border-blue-400"
+                      : "hover:border-red-400"
+                    : ""
+                }
+                ${!isActive && !winner ? "opacity-70" : ""}
+                transition-all duration-200`}
+        onClick={() => handleCellClick(cellIndex)}
+        disabled={!isActive || winner !== null || !isPlayerTurn}
+      >
+        {cellContent}
+      </button>
     );
+  };
+
+  const currentPlayerColor = currentPlayer === "X" ? "blue" : "red";
+
+  return (
+    <div
+      className={`sub-board aspect-square w-full p-2 
+            ${
+              isActive && !winner
+                ? `glass-light border-2 border-${currentPlayerColor}-400 shadow-glow-${currentPlayerColor} ${
+                    isPlayerTurn
+                      ? "animate-pulse-subtle"
+                      : "blur-[0.5px] saturate-[.6] brightness-[.6] transition-all duration-200"
+                  }`
+                : winner
+                ? winner === "X"
+                  ? "shadow-glow-blue inset-shadow"
+                  : winner === "O"
+                  ? "shadow-glow-red inset-shadow"
+                  : "shadow-glow-purple"
+                : "glass opacity-50"
+            }`}
+    >
+      {winner ? (
+        <div
+          className={`w-full h-full flex items-center justify-center text-4xl font-bold select-none  ${
+            winner === "X"
+              ? "winner-x text-blue-400"
+              : winner === "O"
+              ? "winner-o text-red-400"
+              : "winner-cell text-purple-400"
+          }`}
+        >
+          {winner === "Draw" ? "D" : winner}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 grid-rows-3 gap-2 h-full">
+          {[...Array(9)].map((_, cellIndex) => renderCell(cellIndex))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default SubBoard;
+// Compare this snippet from src/components/Board.tsx:
