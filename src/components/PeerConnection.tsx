@@ -1,119 +1,154 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
 import qs from 'qs';
+import { GameState } from '../types/GameState';
+
+type PlayerRole = 'X' | 'O';
+
+interface GameStateData {
+    type: 'gameState';
+    state: GameState;
+}
+
+interface NicknameData {
+    type: 'updateNickname';
+    role: PlayerRole;
+    nickName: string;
+}
+
+type DataMessage = GameStateData | NicknameData;
 
 interface PeerConnectionProps {
     onConnection: (conn: DataConnection, initiator: boolean) => void;
-    onData: (data: any) => void;
+    onData: (data: DataMessage) => void;
     onError: (error: Error) => void;
+    gameState: GameState;
+    generateInvitationLink: () => string;
+    setPeerId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const PeerConnection: React.FC<PeerConnectionProps> = ({ onConnection, onData, onError }) => {
-    const [peerId, setPeerId] = useState<string>('');
+const PeerConnection: React.FC<PeerConnectionProps> = ({
+    onConnection,
+    onData,
+    onError,
+    gameState,
+    generateInvitationLink,
+    setPeerId
+}) => {
     const [peer, setPeer] = useState<Peer | null>(null);
     const [connection, setConnection] = useState<DataConnection | null>(null);
     const [remotePeerId, setRemotePeerId] = useState<string>('');
+    const [connectionStatus, setConnectionStatus] = useState<string>('Disconnected');
+    const [linkCopied, setLinkCopied] = useState<boolean>(false);
 
-    useEffect(() => {
-        if (qs.parse(window.location.search, { ignoreQueryPrefix: true }).remotePeerId) {
-            const queryPeerId = qs.parse(window.location.search, { ignoreQueryPrefix: true }).remotePeerId;
-            if (queryPeerId && typeof queryPeerId === 'string') {
-                setRemotePeerId(queryPeerId);
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        const newPeer = new Peer();
-        setPeer(newPeer);
-
-        newPeer.on('open', (id) => {
-            setPeerId(id);
-        });
-
-        newPeer.on('error', (err) => {
-            onError(err);
-        });
-
-        newPeer.on('connection', (conn) => {
-            setConnection(conn);
-            conn.on('open', () => {
-                onConnection(conn, false);
-                setRemotePeerId(conn.peer);
-                conn.on('data', (data) => {
-                    onData(data);
-                });
-                conn.on('error', (err) => {
-                    onError(err);
-                });
+    const handleIncomingConnection = useCallback((conn: DataConnection) => {
+        setConnection(conn);
+        setConnectionStatus('Incoming connection');
+        conn.on('open', () => {
+            onConnection(conn, false);
+            setRemotePeerId(conn.peer);
+            setConnectionStatus('Connected');
+            conn.on('data', (data: unknown) => {
+                onData(data as DataMessage);
+            });
+            conn.on('error', (err) => {
+                onError(err);
+                setConnectionStatus(`Connection error: ${err.message}`);
             });
         });
-
-        return () => {
-            newPeer.destroy();
-        };
     }, [onConnection, onData, onError]);
 
-    // useEffect(() => {
-    //     // Check if connection is valid
-    //     if (connection && connection.open) {
-    //         setConnectionValid(true);
-    //     } else {
-    //         setConnectionValid(false);
-    //     }
-    // }, [connection]);
-
-    const connectToPeer = useCallback(() => {
-        if (peer && remotePeerId) {
+    const connectToPeer = useCallback((targetPeerId: string, peerInstance: Peer | null = peer) => {
+        if (peerInstance && targetPeerId) {
             try {
-                const conn = peer.connect(remotePeerId);
+                const conn = peerInstance.connect(targetPeerId);
                 setConnection(conn);
+                setConnectionStatus('Connecting...');
                 conn.on('open', () => {
                     onConnection(conn, true);
-                    conn.on('data', (data) => {
-                        onData(data);
+                    setConnectionStatus('Connected');
+                    conn.on('data', (data: unknown) => {
+                        onData(data as DataMessage);
                     });
                     conn.on('error', (err) => {
                         onError(err);
+                        setConnectionStatus(`Connection error: ${err.message}`);
                     });
                 });
             } catch (err) {
                 onError(err instanceof Error ? err : new Error('Failed to connect to peer'));
+                setConnectionStatus('Connection failed');
             }
         }
-    }, [peer, remotePeerId, onConnection, onData, onError]);
+    }, [peer, onConnection, onData, onError]);
 
-    const remotePeerIdIsValid = (id: string): boolean => {
-        return /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(id);
-    };
+    const peerRef = useRef<Peer | null>(null);
 
     useEffect(() => {
-        if (peerId && peer && remotePeerId && remotePeerIdIsValid(remotePeerId)) {
-            connectToPeer();
-        }
-    }, [remotePeerId, connectToPeer, peer, peerId]);
+        const peerOptions = {
+            debug: 3
+        };
+
+        const newPeer = new Peer(peerOptions);
+        setPeer(newPeer);
+        peerRef.current = newPeer;
+
+        newPeer.on('open', (id) => {
+            setPeerId(id);
+            setConnectionStatus('Waiting for connection');
+
+            // Check if there's a remotePeerId in the URL
+            const queryParams = qs.parse(window.location.search, { ignoreQueryPrefix: true });
+            if (queryParams.remotePeerId && typeof queryParams.remotePeerId === 'string') {
+                setRemotePeerId(queryParams.remotePeerId);
+                connectToPeer(queryParams.remotePeerId, newPeer);
+            }
+        });
+
+        newPeer.on('error', (err) => {
+            onError(err);
+            setConnectionStatus(`Error: ${err.message}`);
+        });
+
+        newPeer.on('connection', handleIncomingConnection);
+
+        return () => {
+            if (peerRef.current) {
+                peerRef.current.destroy();
+            }
+        };
+    }, []);
 
     const copyInviteLink = useCallback(() => {
-        navigator.clipboard.writeText(`${window.location.origin}?remotePeerId=${peerId}`);
-    }, [peerId]);
+        const inviteLink = generateInvitationLink();
+        navigator.clipboard.writeText(inviteLink);
+        setLinkCopied(true);
+        setConnectionStatus('Invite link copied. Waiting for peer...');
+        setTimeout(() => setLinkCopied(false), 3000);
+    }, [generateInvitationLink]);
+
+    const getOpponentNickname = () => {
+        if (connection) {
+            const opponent = Object.entries(gameState.players).find(([_, player]) => player.peerId === connection.peer);
+            return opponent ? opponent[1].nickName || 'Unnamed opponent' : 'Unknown opponent';
+        }
+        return 'Not connected';
+    };
 
     return (
         <div className="peer-connection mt-4">
-            <div className="flex justify-center">
-                <p className="text-center mb-2">Your Peer ID: <span className="font-bold">{peerId}</span></p>
-                <div className='cursor-pointer' onClick={() => {
-                    copyInviteLink()
-                }
-                }>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                    </svg>
-                </div>
+            <div className="flex justify-center items-center mb-4">
+                <p className="text-center mr-2">Your Peer ID: <span className="font-bold">{peer?.id}</span></p>
+                <button
+                    onClick={copyInviteLink}
+                    className={`px-4 py-2 ${linkCopied ? 'bg-blue-500' : 'bg-green-500'} text-white font-semibold rounded-lg hover:bg-opacity-80 transition-colors duration-300`}
+                >
+                    {linkCopied ? 'Copied!' : 'Copy Invite Link'}
+                </button>
             </div>
-            {connection ? (
-                <p className="text-center text-green-500 font-semibold">Connected to peer ({remotePeerId})</p>
-            ) : (
-                <div className="flex justify-center">
+            <p className="text-center mb-4">Status: <span className="font-bold">{connectionStatus}</span></p>
+            {!connection && (
+                <div className="flex justify-center mt-4">
                     <input
                         type="text"
                         placeholder="Enter peer ID to connect"
@@ -122,19 +157,23 @@ const PeerConnection: React.FC<PeerConnectionProps> = ({ onConnection, onData, o
                         onChange={(e) => setRemotePeerId(e.target.value)}
                         onKeyPress={(e) => {
                             if (e.key === 'Enter') {
-                                connectToPeer();
+                                connectToPeer(remotePeerId);
                             }
                         }}
                     />
                     <button
-                        onClick={connectToPeer}
-                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-r-lg hover:bg-blue-600 transition-colors duration-300"
+                        onClick={() => connectToPeer(remotePeerId)}
+                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300"
                     >
                         Connect
                     </button>
                 </div>
-            )
-            }
+            )}
+            {connection && (
+                <p className="text-center text-green-500 font-semibold">
+                    Connected to: {getOpponentNickname()}
+                </p>
+            )}
         </div>
     );
 };
