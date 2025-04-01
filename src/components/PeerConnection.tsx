@@ -83,41 +83,82 @@ const PeerConnection: React.FC<PeerConnectionProps> = ({
     }, [peer, onConnection, onData, onError]);
 
     const peerRef = useRef<Peer | null>(null);
-
+    
+    // Store the latest callbacks in refs to prevent effect recreation
+    const onConnectionRef = useRef(onConnection);
+    const onDataRef = useRef(onData);
+    const onErrorRef = useRef(onError);
+    const setPeerIdRef = useRef(setPeerId);
+    
+    // Update refs when callbacks change
     useEffect(() => {
+        onConnectionRef.current = onConnection;
+        onDataRef.current = onData;
+        onErrorRef.current = onError;
+        setPeerIdRef.current = setPeerId;
+    }, [onConnection, onData, onError, setPeerId]);
+    
+    // Store incoming connection handler in a ref
+    const handleIncomingConnectionRef = useRef(handleIncomingConnection);
+    useEffect(() => {
+        handleIncomingConnectionRef.current = handleIncomingConnection;
+    }, [handleIncomingConnection]);
+    
+    // Store connect to peer handler in a ref
+    const connectToPeerRef = useRef(connectToPeer);
+    useEffect(() => {
+        connectToPeerRef.current = connectToPeer;
+    }, [connectToPeer]);
+    
+    // Main peer initialization effect
+    useEffect(() => {
+        let isMounted = true;
+        
         const peerOptions = {
             debug: 3
         };
 
         const newPeer = new Peer(peerOptions);
-        setPeer(newPeer);
-        peerRef.current = newPeer;
+        if (isMounted) {
+            setPeer(newPeer);
+            peerRef.current = newPeer;
+        }
 
         newPeer.on('open', (id) => {
-            setPeerId(id);
+            if (!isMounted) return;
+            
+            setPeerIdRef.current(id);
             setConnectionStatus('Waiting for connection');
 
             // Check if there's a remotePeerId in the URL
             const queryParams = qs.parse(window.location.search, { ignoreQueryPrefix: true });
             if (queryParams.remotePeerId && typeof queryParams.remotePeerId === 'string') {
                 setRemotePeerId(queryParams.remotePeerId);
-                connectToPeer(queryParams.remotePeerId, newPeer);
+                connectToPeerRef.current(queryParams.remotePeerId, newPeer);
             }
         });
 
         newPeer.on('error', (err) => {
-            onError(err);
+            if (!isMounted) return;
+            
+            onErrorRef.current(err);
             setConnectionStatus(`Error: ${err.message}`);
         });
 
-        newPeer.on('connection', handleIncomingConnection);
+        newPeer.on('connection', (conn) => {
+            if (isMounted) {
+                handleIncomingConnectionRef.current(conn);
+            }
+        });
 
         return () => {
+            isMounted = false;
             if (peerRef.current) {
                 peerRef.current.destroy();
+                peerRef.current = null;
             }
         };
-    }, []);
+    }, []); // Empty dependency array is now appropriate since we use refs
 
     const copyInviteLink = useCallback(() => {
         const inviteLink = generateInvitationLink();
