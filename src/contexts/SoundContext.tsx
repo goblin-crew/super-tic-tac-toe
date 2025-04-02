@@ -145,6 +145,16 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     const music = new Audio(soundFiles[SoundType.BACKGROUND_MUSIC]);
     music.loop = true;
     music.volume = volume * 0.3; // Background music a bit quieter
+
+    music.addEventListener("ended", () => {
+      music.currentTime = 0;
+      music.play().catch((error) => {
+        console.error("Error replaying background music:", error);
+      });
+    });
+    music.addEventListener("error", (error) => {
+      console.error("Error loading background music:", error);
+    });
     setBackgroundMusic(music);
 
     return () => {
@@ -195,7 +205,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       const soundPath = soundFiles[soundType];
 
       if (!audioCache[soundPath]) {
-        const prefix = window.location.href;
+        const prefix = window.location.origin + window.location.pathname;
         const path = prefix + soundPath;
         const finalPath = path.replace(/^\//, "");
         console.log("Loading sound:", path);
