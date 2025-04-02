@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { useSound } from "../contexts/SoundContext";
 
 interface SubBoardProps {
   index: number;
@@ -21,10 +22,32 @@ const SubBoard: React.FC<SubBoardProps> = ({
   gameMode,
   playerRole,
 }) => {
+  const {
+    playMoveSound,
+    playHoverSound,
+    playSubBoardHoverSound,
+    playSubBoardWinSound,
+  } = useSound();
+
   const [isPlayerTurn, setIsPlayerTurn] = React.useState<boolean>(
     gameMode === "local" ||
       (gameMode === "online" && currentPlayer === playerRole)
   );
+
+  const prevWinnerRef = useRef<"X" | "O" | "Draw" | null>(null);
+
+  // Play sound when sub-board is won
+  useEffect(() => {
+    if (winner && winner !== prevWinnerRef.current) {
+      if (winner === "Draw") {
+        // No special sound for sub-board draw
+      } else {
+        playSubBoardWinSound(winner);
+      }
+      prevWinnerRef.current = winner;
+    }
+  }, [winner, playSubBoardWinSound]);
+
   useEffect(() => {
     if (gameMode === "online") {
       setIsPlayerTurn(currentPlayer === playerRole);
@@ -36,7 +59,23 @@ const SubBoard: React.FC<SubBoardProps> = ({
   const handleCellClick = (cellIndex: number) => {
     if (!isActive || winner || cells[cellIndex]) return;
     if (gameMode === "online" && currentPlayer !== playerRole) return;
+
+    // Play move sound
+    playMoveSound(currentPlayer);
+
     onMove(index, cellIndex);
+  };
+
+  const handleCellHover = () => {
+    if (isActive && !winner && isPlayerTurn) {
+      playHoverSound(currentPlayer);
+    }
+  };
+
+  const handleSubBoardHover = () => {
+    if (isActive && !winner && isPlayerTurn) {
+      playSubBoardHoverSound(currentPlayer);
+    }
   };
 
   const renderCell = (cellIndex: number) => {
@@ -81,6 +120,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
                 ${!isActive && !winner ? "opacity-70" : ""}
                 transition-all duration-200`}
         onClick={() => handleCellClick(cellIndex)}
+        onMouseEnter={handleCellHover}
         disabled={!isActive || winner !== null || !isPlayerTurn}
       >
         {cellContent}
@@ -108,6 +148,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
                   : "shadow-glow-purple"
                 : "glass opacity-50"
             }`}
+      onMouseEnter={handleSubBoardHover}
     >
       {winner ? (
         <div

@@ -521,6 +521,9 @@ video {
 .mr-2 {
   margin-right: 0.5rem;
 }
+.mr-3 {
+  margin-right: 0.75rem;
+}
 .mr-4 {
   margin-right: 1rem;
 }
@@ -551,6 +554,9 @@ video {
 .aspect-square {
   aspect-ratio: 1 / 1;
 }
+.h-5 {
+  height: 1.25rem;
+}
 .h-full {
   height: 100%;
 }
@@ -559,6 +565,9 @@ video {
 }
 .w-24 {
   width: 6rem;
+}
+.w-5 {
+  width: 1.25rem;
 }
 .w-full {
   width: 100%;
@@ -596,6 +605,11 @@ video {
 }
 .gap-4 {
   gap: 1rem;
+}
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;

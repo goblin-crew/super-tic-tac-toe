@@ -23,6 +23,20 @@ If a player is ever forced to play in a sub-board that has already been won, the
 - Symmetrical square game board with consistent spacing
 - Visual player turn indicators with color-coded highlights
 - Animated UI elements for better user experience
+- Sound effects and background music with theme-based audio design
+- Sound control options to toggle audio on/off
+
+## Sound Design
+
+The game features a comprehensive sound design that enhances the gaming experience:
+
+- **Theme-Based Audio**: Blue player (X) has ice/electric themed sounds, while Red player (O) has fire/ember themed sounds
+- **Interactive Audio Feedback**: 
+  - Hover sounds when moving over active boards and cells
+  - Distinct sounds for placing marks
+  - Victory sounds for winning sub-boards and the game
+- **Background Music**: Ambient space-themed music that creates an immersive atmosphere
+- **Sound Controls**: Easy-to-use toggle buttons for turning sound and music on/off
 
 ## Getting Started with Create React App
 

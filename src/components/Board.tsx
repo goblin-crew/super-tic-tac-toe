@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import SubBoard from "./SubBoard";
+import { useSound } from "../contexts/SoundContext";
 
 interface GameState {
   currentPlayer: "X" | "O";
@@ -22,6 +23,20 @@ const Board: React.FC<BoardProps> = ({
   gameMode,
   playerRole,
 }) => {
+  const { playGameWinSound, playDrawSound } = useSound();
+  const prevWinnerRef = useRef<"X" | "O" | "Draw" | null>(null);
+
+  // Play sound when game is won
+  useEffect(() => {
+    if (gameState.winner && gameState.winner !== prevWinnerRef.current) {
+      if (gameState.winner === "Draw") {
+        playDrawSound();
+      } else {
+        playGameWinSound(gameState.winner);
+      }
+      prevWinnerRef.current = gameState.winner;
+    }
+  }, [gameState.winner, playGameWinSound, playDrawSound]);
   const renderSubBoard = (index: number) => {
     const isActive =
       gameState.nextSubBoard === null || gameState.nextSubBoard === index;

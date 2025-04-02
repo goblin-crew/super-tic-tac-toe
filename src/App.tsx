@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Board from "./components/Board";
 import PeerConnection from "./components/PeerConnection";
+import SoundControl from "./components/SoundControl";
+import { SoundProvider, useSound, SoundType } from "./contexts/SoundContext";
 import { DataConnection } from "peerjs";
 import qs from "qs";
 import { GameState } from "./types/GameState";
@@ -20,7 +22,10 @@ interface NicknameData {
 
 type DataMessage = GameStateData | NicknameData;
 
-const App: React.FC = () => {
+// Inner component that uses sound hooks
+const AppContent: React.FC = () => {
+  const { playSound } = useSound();
+
   const [gameState, setGameState] = useState<GameState>({
     currentPlayer: "X",
     nextSubBoard: null,
@@ -116,6 +121,11 @@ const App: React.FC = () => {
       if (prevState.subBoards[subBoardIndex][cellIndex] !== null)
         return prevState;
 
+      // Play move sound
+      playSound(
+        prevState.currentPlayer === "X" ? SoundType.X_MOVE : SoundType.O_MOVE
+      );
+
       const newSubBoards = prevState.subBoards.map((subBoard, index) =>
         index === subBoardIndex ? [...subBoard] : subBoard
       );
@@ -125,6 +135,26 @@ const App: React.FC = () => {
       const subBoardWinner = checkWinner(newSubBoards[subBoardIndex]);
       if (subBoardWinner) {
         newSubBoardWinners[subBoardIndex] = subBoardWinner;
+
+        // Play sub-board win sound
+        if (subBoardWinner !== "Draw") {
+          playSound(
+            subBoardWinner === "X"
+              ? SoundType.X_SUBBOARD_WIN
+              : SoundType.O_SUBBOARD_WIN
+          );
+        }
+      }
+
+      const gameWinner = checkWinner(newSubBoardWinners);
+
+      // Play game win sound
+      if (gameWinner && gameWinner !== "Draw") {
+        playSound(
+          gameWinner === "X" ? SoundType.X_GAME_WIN : SoundType.O_GAME_WIN
+        );
+      } else if (gameWinner === "Draw") {
+        playSound(SoundType.DRAW);
       }
 
       const newState: GameState = {
@@ -132,7 +162,7 @@ const App: React.FC = () => {
         nextSubBoard: newSubBoardWinners[cellIndex] !== null ? null : cellIndex,
         subBoardWinners: newSubBoardWinners,
         subBoards: newSubBoards,
-        winner: checkWinner(newSubBoardWinners),
+        winner: gameWinner,
         players: prevState.players,
       };
 
@@ -145,6 +175,8 @@ const App: React.FC = () => {
   };
 
   const resetGame = useCallback(() => {
+    playSound(SoundType.GAME_START);
+
     const newState: GameState = {
       currentPlayer: "X",
       nextSubBoard: null,
@@ -162,7 +194,7 @@ const App: React.FC = () => {
     if (gameMode === "online" && connection) {
       connection.send({ type: "gameState", state: newState });
     }
-  }, [connection, gameMode]);
+  }, [connection, gameMode, playSound]);
 
   const updateNickname = useCallback(
     (role?: PlayerRole) => {
@@ -244,15 +276,17 @@ const App: React.FC = () => {
   }, []);
 
   const startLocalGame = () => {
+    playSound(SoundType.GAME_START);
     setGameMode("local");
     setPlayerRole(null);
     resetGame();
   };
 
   const startOnlineGame = useCallback(() => {
+    playSound(SoundType.GAME_START);
     setGameMode("online");
     resetGame();
-  }, [resetGame]);
+  }, [resetGame, playSound]);
 
   useEffect(() => {
     if (
@@ -276,6 +310,7 @@ const App: React.FC = () => {
   }, [peerId]);
 
   const goBackToSelection = () => {
+    playSound(SoundType.BUTTON_CLICK);
     setGameMode(null);
     setPlayerRole(null);
     setError(null);
@@ -367,18 +402,21 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-2">
       <div className="glass rounded-xl p-4 max-w-4xl w-full">
-        <div className="flex justify-start items-center mb-3">
-          {gameMode !== null && (
-            <button
-              onClick={goBackToSelection}
-              className="glass-button-secondary px-3 py-1 text-white font-semibold rounded-lg text-sm"
-            >
-              ← Back
-            </button>
-          )}
-          <h1 className="text-3xl font-bold text-blue-400">
-            Super Tic Tac Toe
-          </h1>
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center">
+            {gameMode !== null && (
+              <button
+                onClick={goBackToSelection}
+                className="glass-button-secondary px-3 py-1 text-white font-semibold rounded-lg text-sm mr-3"
+              >
+                ← Back
+              </button>
+            )}
+            <h1 className="text-3xl font-bold text-blue-400">
+              Super Tic Tac Toe
+            </h1>
+          </div>
+          <SoundControl />
         </div>
         {error && (
           <div
@@ -465,6 +503,15 @@ const App: React.FC = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Main App component that provides the SoundProvider
+const App: React.FC = () => {
+  return (
+    <SoundProvider>
+      <AppContent />
+    </SoundProvider>
   );
 };
 
