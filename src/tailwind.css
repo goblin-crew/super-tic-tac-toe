@@ -899,6 +899,10 @@ code {
   }
 }
 
+.inset-shadow {
+      box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) inset;
+}
+
 /* .winner-x {
   animation: glow-pulse-x 1.5s infinite;
 }

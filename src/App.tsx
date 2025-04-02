@@ -367,10 +367,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-2">
       <div className="glass rounded-xl p-4 max-w-4xl w-full">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-3xl font-bold text-blue-400">
-            Super Tic Tac Toe
-          </h1>
+        <div className="flex justify-start items-center mb-3">
           {gameMode !== null && (
             <button
               onClick={goBackToSelection}
@@ -379,6 +376,9 @@ const App: React.FC = () => {
               ← Back
             </button>
           )}
+          <h1 className="text-3xl font-bold text-blue-400">
+            Super Tic Tac Toe
+          </h1>
         </div>
         {error && (
           <div
