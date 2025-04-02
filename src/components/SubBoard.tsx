@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useSound } from "../contexts/SoundContext";
-import Lottie, { useLottie } from "lottie-react";
+import Lottie from "lottie-react";
 import xAnimation from "../assets/lottie/xAnimation.json";
 import oAnimation from "../assets/lottie/oAnimation.json";
 
