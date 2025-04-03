@@ -11,11 +11,11 @@ const PlayerIcon: React.FC<PlayerIconProps> = ({ player }) => {
     X: {
       frame:
         "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1505620/1fce705218bd7ff793aff02555ca00d4de0b147c.png",
-      icon: "/icons/x.gif",
+      icon: `${process.env.PUBLIC_URL}/icons/x.gif`,
     },
     O: {
-      frame: "/icons/o_frame.gif",
-      icon: "/icons/o.gif",
+      frame: `${process.env.PUBLIC_URL}/icons/o_frame.gif`,
+      icon: `${process.env.PUBLIC_URL}/icons/o.gif`,
     },
   };
 
@@ -23,16 +23,26 @@ const PlayerIcon: React.FC<PlayerIconProps> = ({ player }) => {
 
   return (
     <>
-      {mode === "image" ? (
-        <img
-          src={imageMap[player as string]?.frame}
-          alt={player || ""}
-          style={{
-            width: "100%",
-            height: "100%",
-            margin: "0 auto",
-          }}
-        />
+      {mode === "image" && player ? (
+        // <img
+        //   src={imageMap[player as string]?.icon}
+        //   alt={player || ""}
+        //   className="object-contain w-full h-full"
+        // />
+        <div className="relative w-full h-full">
+          {/* Frame as background */}
+          <img
+            src={imageMap[player as string]?.frame}
+            alt={`${player || ""} frame`}
+            className="object-contain absolute inset-0 w-full h-full"
+          />
+          {/* Icon on top */}
+          <img
+            src={imageMap[player as string]?.icon}
+            alt={player || ""}
+            className="object-contain absolute inset-0 w-full h-full z-10 p-4"
+          />
+        </div>
       ) : (
         <>
           {player === "Draw" && "D"}

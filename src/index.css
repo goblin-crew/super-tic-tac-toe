@@ -201,3 +201,31 @@ code {
   position: relative;
   vertical-align: bottom;
 }
+
+.mask-x::after {
+  mask: url(../public/icons/x_mask.jpg) no-repeat center luminance;
+  -webkit-mask: url(../public/icons/x_mask.jpg) no-repeat center luminance;
+  mask-size: cover;
+  background-color: var(--tw-shadow-color);
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.mask-o::after {
+  mask: url(../public/icons/o_mask.jpg) no-repeat center luminance;
+  -webkit-mask: url(../public/icons/o_mask.jpg) no-repeat luminance;
+  mask-size: cover;
+  background-color: var(--tw-shadow-color);
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}

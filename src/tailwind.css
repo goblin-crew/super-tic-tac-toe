@@ -492,8 +492,17 @@ video {
 [hidden] {
   display: none;
 }
+.absolute {
+  position: absolute;
+}
 .relative {
   position: relative;
+}
+.inset-0 {
+  inset: 0px;
+}
+.z-10 {
+  z-index: 10;
 }
 .mx-auto {
   margin-left: auto;
@@ -642,6 +651,9 @@ video {
 .border-red-400 {
   --tw-border-opacity: 1;
   border-color: rgb(248 113 113 / var(--tw-border-opacity));
+}
+.object-contain {
+  object-fit: contain;
 }
 .p-2 {
   padding: 0.5rem;
@@ -991,6 +1003,18 @@ code {
   display: inline-block;
   position: relative;
   vertical-align: bottom;
+}
+
+.mask-x::backdrop {
+  mask: url(../public/icons/x_mask.jpg) no-repeat center;
+  -webkit-mask: url(../public/icons/x_mask.jpg) no-repeat center;
+  mask-size: contain;
+}
+
+.mask-o::backdrop {
+  mask: url(../public/icons/o_mask.jpg) no-repeat center;
+  -webkit-mask: url(../public/icons/o_mask.jpg) no-repeat center;
+  mask-size: contain;
 }
 
 .hover\:border-blue-400:hover {

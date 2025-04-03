@@ -87,7 +87,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
     return (
       <button
         key={cellIndex}
-        className={`cell aspect-square w-full flex items-center justify-center text-2xl font-bold 
+        className={`cell aspect-square w-full flex items-center justify-center text-2xl font-bold relative overflow-hidden
                 ${
                   isActive && !winner
                     ? "glass-light hover:bg-glass-200"
@@ -95,20 +95,20 @@ const SubBoard: React.FC<SubBoardProps> = ({
                 }
                 ${
                   cellContent === "X"
-                    ? "text-blue-400"
+                    ? "text-blue-400 mask-x"
                     : cellContent === "O"
-                    ? "text-red-400"
+                    ? "text-red-400 mask-o"
                     : ""
                 }
                 ${winner ? "winner-cell" : ""}
                 ${
                   cellContent === "X"
                     ? isActive
-                      ? "shadow-glow-blue"
+                      ? "shadow-glow-blue mask-x"
                       : ""
                     : cellContent === "O"
                     ? isActive
-                      ? "shadow-glow-red"
+                      ? "shadow-glow-red mask-o"
                       : ""
                     : ""
                 }
@@ -134,7 +134,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
 
   return (
     <div
-      className={`sub-board aspect-square w-full p-2 
+      className={`sub-board aspect-square w-full p-2 relative overflow-hidden
             ${
               isActive && !winner
                 ? `glass-light border-2 border-${currentPlayerColor}-400 shadow-glow-${currentPlayerColor} ${
@@ -144,9 +144,9 @@ const SubBoard: React.FC<SubBoardProps> = ({
                   }`
                 : winner
                 ? winner === "X"
-                  ? "shadow-glow-blue inset-shadow"
+                  ? "shadow-glow-blue inset-shadow mask-x"
                   : winner === "O"
-                  ? "shadow-glow-red inset-shadow"
+                  ? "shadow-glow-red inset-shadow mask-o"
                   : "shadow-glow-purple"
                 : "glass opacity-50"
             }`}
