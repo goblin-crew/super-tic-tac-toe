@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useSound } from "../contexts/SoundContext";
-import Lottie from "lottie-react";
-import xAnimation from "../assets/lottie/xAnimation.json";
-import oAnimation from "../assets/lottie/oAnimation.json";
+
+import PlayerIcon from "./PlayerIcon";
 
 interface SubBoardProps {
   index: number;
@@ -126,12 +125,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
         onMouseEnter={handleCellHover}
         disabled={!isActive || winner !== null || !isPlayerTurn}
       >
-        {cellContent === "X" && (
-          <Lottie animationData={xAnimation} loop={true} />
-        )}
-        {cellContent === "O" && (
-          <Lottie animationData={oAnimation} loop={true} />
-        )}
+        <PlayerIcon player={cellContent} />
       </button>
     );
   };
@@ -168,9 +162,7 @@ const SubBoard: React.FC<SubBoardProps> = ({
               : "winner-cell text-purple-400"
           }`}
         >
-          {winner === "Draw" && "D"}
-          {winner === "X" && <Lottie animationData={xAnimation} loop={true} />}
-          {winner === "O" && <Lottie animationData={oAnimation} loop={true} />}
+          <PlayerIcon player={winner} />
         </div>
       ) : (
         <div className="grid grid-cols-3 grid-rows-3 gap-2 h-full">
